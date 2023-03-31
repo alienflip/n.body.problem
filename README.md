@@ -2,10 +2,14 @@
 
 ## set-up environment
 
+> set access rights
+
 ```
 chmod a+x run.sh
 chmod a+x dependencies.sh
 ```
+
+> virtual environment
 
 ```
 python3 -m venv .
@@ -15,11 +19,17 @@ python3 -m venv .
 source ./bin/activate
 ```
 
+> install dependecies 
+
 ```
 ./dependencies.sh
 ```
 
-## run python and c++
+## Tests
+
+> Benchmark with Python
+
+> Test C++ against Python
 
 ```
 ./run.sh
@@ -27,4 +37,4 @@ source ./bin/activate
 
 ## run accelerator
 
-> check in the [Accelerator directory](./Accelerator/)
+> follow the [accelerator directory](./Accelerator/)
