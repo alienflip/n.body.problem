@@ -17,7 +17,7 @@ server_socket.bind((HOST, PORT))
 server_socket.listen(1)
 
 # Z2 constants
-DIM = 256
+DIM = 1024
 DATA_TYPE = np.float32
 in_buffer = allocate(shape=(DIM,), dtype=DATA_TYPE)
 out_buffer = allocate(shape=(DIM,), dtype=DATA_TYPE)

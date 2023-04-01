@@ -14,10 +14,10 @@ client_socket.connect((host, port))
 
 # Data constants
 DATA_TYPE = np.float32
-SIZE = 256
+SIZE = 1024
 
 # Create an array to send operate on
-a = np.zeros((SIZE, 4), dtype=DATA_TYPE)
+a = np.zeros((SIZE,), dtype=DATA_TYPE)
 for i in range(SIZE):
     a[i] = DATA_TYPE(10 * np.random.random_sample())
 
