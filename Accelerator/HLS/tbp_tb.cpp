@@ -51,27 +51,6 @@ int main(void) {
         }
     }
 
-    std::cout << "signal in_sw:" << std::endl;
-    for (i = 0; i < NUM_BODIES; i++) {
-        std::cout << "(" << sys_sw[i].position[0] << ", " << sys_sw[i].position[1] << ") ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "signal in_hw:" << std::endl;
-    for (i = 0; i < NUM_BODIES; i++) {
-        std::cout << "(" << sys_hw[i].position[0] << ", " << sys_hw[i].position[1] << ") ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "signal in_hw:" << std::endl;
-    for (i = 0; i < NUM_BODIES; i++) {
-        bool is_same_x = sys_sw[i].position[0] == sys_hw[i].position[0];
-        bool is_same_y = sys_sw[i].position[1] == sys_hw[i].position[1];
-        std::cout << "(" << is_same_x << ", " << is_same_y << ") ";
-
-    }
-    std::cout << std::endl;
-
     /* software */
     sw_tbp(sys_sw);
     std::cout<<"software kernel complete\n"<<std::endl;

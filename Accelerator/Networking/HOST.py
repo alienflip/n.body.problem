@@ -19,7 +19,7 @@ SIZE = 1024
 # Create an array to send operate on
 a = np.zeros((SIZE,), dtype=DATA_TYPE)
 for i in range(SIZE):
-    a[i] = DATA_TYPE(10 * np.random.random_sample())
+    a[i] = DATA_TYPE(i % 2)
 
 # Begin benchmark, and send the array to the server
 times = datetime.datetime.now()
@@ -27,7 +27,7 @@ client_socket.sendall(a.tobytes())
 
 # Receive the modified array from the server, and finish benchmark
 data = client_socket.recv(4096)
-a_modified = np.frombuffer(data, dtype=DATA_TYPE) #.reshape(-2, 4)
+a_modified = np.frombuffer(data, dtype=DATA_TYPE).reshape(-2, 8)
 timee = datetime.datetime.now()
 
 print("Time in microseconds: ", (timee - times).microseconds)

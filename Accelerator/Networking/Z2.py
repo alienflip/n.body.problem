@@ -40,10 +40,10 @@ while True:
 
     # Receive the array from the client
     data = client_socket.recv(PACKET_SIZE)
-    a = np.frombuffer(data, dtype=DATA_TYPE)
+    A = np.frombuffer(data, dtype=DATA_TYPE)
     
     # Execute FFT on array
-    silicon(a)
+    silicon(A)
 
     # Send the modified array back to the client
     client_socket.sendall(out_buffer.tobytes())

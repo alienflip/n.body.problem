@@ -1,4 +1,4 @@
-# Three-Body-Problem
+# N-Body-Problem
 
 ## set-up environment
 
