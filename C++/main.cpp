@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int NUM_BODIES = 3;
+const int NUM_BODIES = 128;
 const float G = -1.0;
 
 typedef struct _body {
@@ -15,7 +15,7 @@ typedef struct _body {
     float position[2];
     float velocity[2];
     float acceleration[2];
-}body;
+} body;
         
 float squared(float x){
     return x*x;
@@ -25,22 +25,24 @@ float cubed(float x){
     return x*x*x;
 }
 
-float distance(body body_0, body body_1){
+float distance(body& body_0, body& body_1){
     float x = squared(body_0.position[0] - body_1.position[0]);
     float y = squared(body_0.position[1] - body_1.position[1]);
     return (float)sqrt(x + y);
 }
 
-float acceleration(float mass_0, body body_0, body body_1){
+float acceleration(float mass_0, body& body_0, body& body_1){
     float distance_ = distance(body_0, body_1);
     float denominator = squared(distance_);
     if(denominator < 0.1){
-        denominator = 0.1;
+        return 0.1;
     }
-    return G * mass_0 / denominator;
+    else {
+        return G * mass_0 / denominator;
+    }
 }
 
-void direction(body body_0, body body_1, float out_direction[2]){
+void direction(body& body_0, body& body_1, float out_direction[2]){
     float distance_ = distance(body_0, body_1);
     if(distance_ < 0.1){
         distance_ = 0.1;
@@ -49,10 +51,9 @@ void direction(body body_0, body body_1, float out_direction[2]){
     float y = (body_0.position[1] - body_1.position[1]) / distance_;
     out_direction[0] = x;
     out_direction[1] = y;
-
 }
 
-void acceleration_step(body body_0, body system[NUM_BODIES], float out_acceleration[2]){
+void acceleration_step(body& body_0, body system[NUM_BODIES], float out_acceleration[2]){
     float out_direction[2] = {0.0, 0.0};
     for(int i = 0; i < NUM_BODIES; i++){
         if(system[i].id != body_0.id){
@@ -78,7 +79,7 @@ void postion_step(float inital_position[2], float initial_velocity[2], float tim
     out_position[1] = out_position_y;
 }
 
-void step(body body_0, float initial_position[2], float initial_velocity[2], float initial_acceleration[2], body system[NUM_BODIES], float time_step){
+void step(body& body_0, float initial_position[2], float initial_velocity[2], float initial_acceleration[2], body system[NUM_BODIES], float time_step){
     float out_acceleration[2];
     float out_velocity[2];
     float out_position[2];
@@ -105,8 +106,8 @@ int main(){
     body system[NUM_BODIES];
     for(int i = 0; i < NUM_BODIES; i++){
         body new_body;
-        float r_0 = (float)rand();
-        float r_1 = (float)rand();
+        float r_0 = (float)(rand() % 100);
+        float r_1 = (float)(rand() % 100);
         new_body.id = i;
         new_body.mass = 1.0;
         new_body.position[0] = r_0;
@@ -117,7 +118,9 @@ int main(){
         new_body.acceleration[1] = 0.0;
         system[i] = new_body;
     }
+
     for(int i = 0; i < 808; i++){
+        std::cout << "Particle 0 position: [" << system[0].position[0] << ", " << system[0].position[1] << "]" << std::endl;
         total_step(system, time_step);
         time_step += 0.01;
     }

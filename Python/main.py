@@ -108,13 +108,11 @@ def sim(screen):
     time_average, counter = [], 0
     time_step = 0
     system = [body(id=i, position=random_position(), mass=random.randint(0, 100)/10) for i in range(NUM_BODIES)]
-    system[0].position = [2, 5]
-    system[1].position = [600, 90]
-    system[2].position = [20, 600] 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return pygame.quit()
+        print("Particle 0 position: ", system[0].position)
         time_start = datetime.datetime.now()
         total_step(system, time_step)
         time_end = datetime.datetime.now()
@@ -122,7 +120,7 @@ def sim(screen):
         draw_all(system, screen)
         time_step += 0.01
         counter+=1
-        if counter == -808:
+        if counter == 808:
             print("Average step time in microseconds: ", numpy.average(time_average))
             break
 
