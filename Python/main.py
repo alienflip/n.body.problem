@@ -5,18 +5,25 @@ pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 screen.fill("black")
 
+def random_color():
+    r = random.randint(0, 255)
+    b = random.randint(0, 255)
+    g = random.randint(0, 255)
+    a = 255
+    return [r, g, b ,a]
+
 # physical scalars
-NUM_BODIES=128
+NUM_BODIES = 128
 G = -1
-dt, time_step = 0, 0
 
 class body:
-    def __init__(self, id, mass, position, velocity=[0,0], acceleration=[0, 0]):
+    def __init__(self, id, mass, position, velocity=[0,0], acceleration=[0, 0], color='white'):
         self.id = id
         self.mass = mass
         self.position = position
         self.velocity = velocity
         self.acceleration = acceleration
+        self.color = random_color()
         
 # equations of motion
 def squared(x):
@@ -32,14 +39,17 @@ def distance(body_0, body_1):
 
 def acceleration(m_0, body_0, body_1):
     denom = squared(distance(body_0, body_1))
-    if denom == 0:
-        return 1e-7
+    if denom < 0.1:
+        return 0.1
     else:
         return G * m_0 / denom
     
 def direction(body_0, body_1):
-    x = (body_0.position[0] - body_1.position[0]) / distance(body_0, body_1)
-    y = (body_0.position[1] - body_1.position[1]) / distance(body_0, body_1)
+    dist = distance(body_0, body_1)
+    if dist < 0.1:
+        dist = 0.1
+    x = (body_0.position[0] - body_1.position[0]) / dist
+    y = (body_0.position[1] - body_1.position[1]) / dist
     return [x, y]
 
 def total_acceleration(body, system):
@@ -66,43 +76,55 @@ def postion_step(inital_position, initial_velocity, time_step, acceleration):
     return [postion_x, postion_y]
 
 # time step calculations
-def step(body, initial_velocity, initial_position, initial_acceleration, system):
+def step(body, initial_velocity, initial_position, initial_acceleration, system, time_step):
     body.acceleration = acceleration_step(body, system)
     body.velocity = velocity_step(initial_velocity, time_step, initial_acceleration)
     body.position = postion_step(initial_position, initial_velocity, time_step, initial_acceleration)
 
-def total_step(system):
+def total_step(system, time_step):
     for body in system:
-        step(body, body.velocity, body.position, body.acceleration, system)
+        step(body, body.velocity, body.position, body.acceleration, system, time_step)
 
 # draw function
 def random_position():
     return (random.randrange(screen.get_width()), random.randrange(screen.get_width()))
 
 def draw(position, screen, color):
-    screen.fill("black")
     position = pygame.Vector2(position[0], position[1])
-    pygame.draw.circle(screen, color, position, 10)
-        
-def sim(time_step, screen):
-    timea = []
-    clock = pygame.time.Clock()
-    system = [body(id=i, position=random_position(), mass=1) for i in range(NUM_BODIES)]
-    counter = 0
+    if position[0] < 0 or position[1] < 0:
+        return
+    if position[0] > screen.get_width() or position[1] > screen.get_width():
+        return
+    else:
+        pygame.draw.circle(screen, color, position, 10)
+
+def draw_all(system, screen):
+    screen.fill("black")
+    for body in system:
+        draw(body.position, screen, body.color)
+    pygame.display.flip()
+
+def sim(screen):
+    time_average, counter = [], 0
+    time_step = 0
+    system = [body(id=i, position=random_position(), mass=random.randint(0, 100)/10) for i in range(NUM_BODIES)]
+    system[0].position = [2, 5]
+    system[1].position = [600, 90]
+    system[2].position = [20, 600] 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return pygame.quit()
-        times = datetime.datetime.now()
-        total_step(system)
-        timee = datetime.datetime.now()
-        timea.append((timee - times).microseconds)
-        pygame.display.flip()
-        dt = clock.tick(60) / 1000
-        time_step += dt
+        time_start = datetime.datetime.now()
+        total_step(system, time_step)
+        time_end = datetime.datetime.now()
+        time_average.append((time_end - time_start).microseconds)
+        draw_all(system, screen)
+        time_step += 0.01
         counter+=1
-        if counter == 100:
-            print("Average step time in microseconds: ", numpy.average(timea))
+        if counter == -808:
+            print("Average step time in microseconds: ", numpy.average(time_average))
             break
 
-sim(time_step=time_step, screen=screen)
+sim(screen=screen)
+print(" ")

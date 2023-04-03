@@ -1,5 +1,7 @@
 # N-Body-Problem
 
+![Alt Text](./nbp.gif)
+
 ## set-up environment
 
 > set access rights
@@ -25,16 +27,12 @@ source ./bin/activate
 ./dependencies.sh
 ```
 
-## Tests
-
-> Benchmark with Python
-
-> Test C++ against Python
+## tests on host
 
 ```
 ./run.sh
 ```
 
-## run accelerator
+## run accelerator on Z2
 
 > follow the [accelerator directory](./Accelerator/)
