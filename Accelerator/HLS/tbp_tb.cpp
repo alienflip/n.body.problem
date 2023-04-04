@@ -1,9 +1,9 @@
 #include "tbp.hpp"
 
-void sw_tbp(struct body system[NUM_BODIES]) {
+void sw_tbp(body system[NUM_BODIES], float time_step) {
     for(int i = 0; i < NUM_BODIES; i++){
-        struct body body = system[i];
-        step(body, body.velocity, body.position, body.acceleration, system);
+        body body_0 = system[i];
+        step(body_0, body_0.velocity, body_0.position, body_0.acceleration, system, time_step);
     }
 }
 
@@ -11,10 +11,12 @@ int main(void) {
 	/*initialise*/
     int i, err;
 
+    float time_step = 1.0101;
     DataType in[N];
     DataType out_sw[N];
     DataType out_hw[N];
 
+    std::cout << std::endl;
     std::cout << "signal in:" << std::endl;
     for (i = 0; i < N; i++) {
     	in[i] = (float)(i % 2);
@@ -22,12 +24,12 @@ int main(void) {
     }
     std::cout << std::endl;
 
-    struct body sys_sw[NUM_BODIES];
-    struct body sys_hw[NUM_BODIES];
+    body sys_sw[NUM_BODIES];
+    body sys_hw[NUM_BODIES];
     for(int i = 0; i < N; i++){
         if(i % 8 == 0){
         	int j = (int)(i / 8);
-            struct body new_body;
+            body new_body;
             new_body.id = in[j];
             new_body.mass = in[j + 1];
             new_body.position[0] = in[j + 2];
@@ -38,7 +40,7 @@ int main(void) {
             new_body.acceleration[1] = in[j + 7];
             sys_sw[j] = new_body;
 
-            struct body new_body_;
+            body new_body_;
             new_body_.id = in[j];
             new_body_.mass = in[j + 1];
             new_body_.position[0] = in[j + 2];
@@ -50,9 +52,10 @@ int main(void) {
             sys_hw[j] = new_body_;
         }
     }
+    std::cout << std::endl;
 
     /* software */
-    sw_tbp(sys_sw);
+    sw_tbp(sys_sw, time_step);
     std::cout<<"software kernel complete\n"<<std::endl;
     for(int j = 0; j < NUM_BODIES; j++){
         int i = 8 * j;
@@ -67,7 +70,7 @@ int main(void) {
     }
 
     /* hardware */
-    tbp<DataType>(sys_hw);
+    tbp<DataType>(sys_hw, time_step);
     std::cout<<"hardware kernel complete\n"<<std::endl;
     for(int j = 0; j < NUM_BODIES; j++){
         int i = 8 * j;
@@ -97,5 +100,6 @@ int main(void) {
         return 0;
     }
     printf("Test failed\r\n");
+    std::cout << std::endl;
     return 1;
 }

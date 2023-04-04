@@ -85,7 +85,7 @@ void step(body& body_0, float initial_position[2], float initial_velocity[2], fl
     float out_position[2];
     acceleration_step(body_0, system, out_acceleration);
     velocity_step(initial_velocity, time_step, initial_acceleration, out_velocity);
-    postion_step(initial_position, initial_velocity, time_step, initial_acceleration, out_position);
+    postion_step(initial_velocity, initial_position, time_step, initial_acceleration, out_position);
     body_0.acceleration[0] = out_acceleration[0];
     body_0.acceleration[1] = out_acceleration[1];
     body_0.velocity[0] = out_velocity[0];

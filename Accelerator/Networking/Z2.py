@@ -7,6 +7,7 @@ import numpy as np
 ol = Overlay('./accel.bit')
 ol.download()
 dma0 = ol.axi_dma_0
+time_step_ip = ol.n_body_problem
 
 # Server constants
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,14 +24,20 @@ in_buffer = allocate(shape=(DIM,), dtype=DATA_TYPE)
 out_buffer = allocate(shape=(DIM,), dtype=DATA_TYPE)
 C = np.zeros((DIM,), dtype=DATA_TYPE)
 
+# Physics variables
+time_step = 0.0
+
 # Hardware calls
 def silicon(A):
     np.copyto(in_buffer, A)
     np.copyto(out_buffer, C)
+    # ip write location found in: <vitis_solution_directory>/impl/misc/drivers/<solution_name>_v1_0/src/x<solution_name>_hw.h
+    time_step_ip.write(0x10, DATA_TYPE(time_step))
     dma0.sendchannel.transfer(in_buffer)
     dma0.recvchannel.transfer(out_buffer)
     dma0.sendchannel.wait()
     dma0.recvchannel.wait()
+    time_step += 0.01
 
 while True:
     # Wait for a connection

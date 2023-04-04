@@ -75,19 +75,31 @@ def postion_step(inital_position, initial_velocity, time_step, acceleration):
     postion_y = inital_position[1] + initial_velocity[1] * time_step + 0.5 * acceleration[1] * squared(time_step)
     return [postion_x, postion_y]
 
+# assuming a universe with a toral topology
+def boundary_condition(body, dimensions):
+    if body.position[0] < 0:
+        body.position[0] = dimensions[0]
+    if body.position[1] < 0:
+        body.position[1] = dimensions[1]
+    if body.position[0] > dimensions[0]:
+        body.position[0] = 0
+    if body.position[1] > dimensions[1]:
+        body.position[1] = 0
+
 # time step calculations
-def step(body, initial_velocity, initial_position, initial_acceleration, system, time_step):
+def step(body, initial_velocity, initial_position, initial_acceleration, system, time_step, dimensions):
     body.acceleration = acceleration_step(body, system)
+    boundary_condition(body, dimensions)
     body.velocity = velocity_step(initial_velocity, time_step, initial_acceleration)
     body.position = postion_step(initial_position, initial_velocity, time_step, initial_acceleration)
 
-def total_step(system, time_step):
+def total_step(system, time_step, dimensions):
     for body in system:
-        step(body, body.velocity, body.position, body.acceleration, system, time_step)
+        step(body, body.velocity, body.position, body.acceleration, system, time_step, dimensions)
 
 # draw function
 def random_position():
-    return (random.randrange(screen.get_width()), random.randrange(screen.get_width()))
+    return (random.randrange(screen.get_width()), random.randrange(screen.get_height()))
 
 def draw(position, screen, color):
     position = pygame.Vector2(position[0], position[1])
@@ -107,18 +119,19 @@ def draw_all(system, screen):
 def sim(screen):
     time_average, counter = [], 0
     time_step = 0
-    system = [body(id=i, position=random_position(), mass=random.randint(0, 100)/10) for i in range(NUM_BODIES)]
+    system = [body(id=i, position=random_position(), mass=random.randint(0, 10)) for i in range(NUM_BODIES)]
+    dimensions = [screen.get_width(), screen.get_height()]
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return pygame.quit()
         print("Particle 0 position: ", system[0].position)
         time_start = datetime.datetime.now()
-        total_step(system, time_step)
+        total_step(system, time_step, dimensions)
         time_end = datetime.datetime.now()
         time_average.append((time_end - time_start).microseconds)
         draw_all(system, screen)
-        time_step += 0.01
+        time_step += 0.001
         counter+=1
         if counter == 808:
             print("Average step time in microseconds: ", numpy.average(time_average))

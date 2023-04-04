@@ -1,5 +1,7 @@
 # Accelerator
 
-> Run [this](./Networking/Z2.py) on the Z2 - make to compile this folder in Vitis and Vivado [here](./HLS/), and then add the `.bit`/`.hwh` files to the Z2
+> compile [this](./HLS/) folder in Vitis and then build the bitstream in Vivado, and then add the `.bit`/`.hwh` files to the Z2 (renamed as `accel.bit` and `accel.hwh`)
 
-> Run [this](./Networking/HOST.py) on your host machine
+> add [this](./Networking/Z2.py) on the Z2, and then run it
+
+> run [this](./Networking/HOST.py) on your host machine

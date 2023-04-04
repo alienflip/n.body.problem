@@ -36,3 +36,5 @@ source ./bin/activate
 ## run accelerator on Z2
 
 > follow the [accelerator directory](./Accelerator/)
+
+> > on low spec machines - this system will at the least `4X` the native python implementation

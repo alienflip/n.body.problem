@@ -8,37 +8,40 @@ float cubed(float x){
     return x*x*x;
 }
 
-float distance(struct body body_0, struct body body_1){
+float distance(body& body_0, body& body_1){
     float x = squared(body_0.position[0] - body_1.position[0]);
     float y = squared(body_0.position[1] - body_1.position[1]);
     return (float)sqrt(x + y);
 }
 
-float acceleration(float mass_0, struct body body_0, struct body body_1){
+float acceleration(float mass_0, body& body_0, body& body_1){
     float distance_ = distance(body_0, body_1);
     float denominator = squared(distance_);
-    if(denominator == 0){
-        return 0.00000001;
+    if(denominator < 0.01){
+        return 0.01;
     }else{
         return G * mass_0 / denominator;
     }
 }
 
-void direction(struct body body_0, struct body body_1, float out_direction[2]){
+void direction(body& body_0, body& body_1, float out_direction[2]){
     float distance_ = distance(body_0, body_1);
+    if(distance_ < 0.01){
+        distance_ = 0.01;
+    }
     float x = (body_0.position[0] - body_1.position[0]) / distance_;
     float y = (body_0.position[1] - body_1.position[1]) / distance_;
     out_direction[0] = x;
     out_direction[1] = y;
 }
 
-void acceleration_step(struct body body, struct body system[NUM_BODIES], float out_acceleration[2]){
+void acceleration_step(body& body_0, body system[NUM_BODIES], float out_acceleration[2]){
     float out_direction[2] = {0.0, 0.0};
     for(int i = 0; i < NUM_BODIES; i++){
-        struct body body_ = system[i];
-        if(body_.id != body.id){
-            float accel = acceleration(body_.mass, body, body_);
-            direction(body, body_, out_direction);
+        body body_ = system[i];
+        if(body_.id != body_0.id){
+            float accel = acceleration(body_.mass, body_0, body_);
+            direction(body_0, body_, out_direction);
             out_acceleration[0] += out_direction[0] * accel;
             out_acceleration[1] += out_direction[1] * accel;
         }
@@ -59,33 +62,34 @@ void postion_step(float inital_position[2], float initial_velocity[2], float tim
     out_position[1] = out_position_y;
 }
 
-void step(struct body body, float initial_position[2], float initial_velocity[2], float initial_acceleration[2], struct body system[NUM_BODIES]){
+void step(body& body_0, float initial_position[2], float initial_velocity[2], float initial_acceleration[2], body system[NUM_BODIES], float time_step){
     float out_acceleration[2];
     float out_velocity[2];
     float out_position[2];
-    acceleration_step(body, system, out_acceleration);
+    acceleration_step(body_0, system, out_acceleration);
     velocity_step(initial_velocity, time_step, initial_acceleration, out_velocity);
-    postion_step(initial_position, initial_velocity, time_step, initial_acceleration, out_position);
-    body.acceleration[0] = out_acceleration[0];
-    body.acceleration[1] = out_acceleration[1];
-    body.velocity[0] = out_velocity[0];
-    body.velocity[1] = out_velocity[1];
-    body.position[0] = out_position[0];
-    body.position[1] = out_position[1];
+    postion_step(initial_velocity, initial_position, time_step, initial_acceleration, out_position);
+    body_0.acceleration[0] = out_acceleration[0];
+    body_0.acceleration[1] = out_acceleration[1];
+    body_0.velocity[0] = out_velocity[0];
+    body_0.velocity[1] = out_velocity[1];
+    body_0.position[0] = out_position[0];
+    body_0.position[1] = out_position[1];
 }
 
-void total_step(struct body system[NUM_BODIES]){
+void total_step(body system[NUM_BODIES], float time_step){
     for(int i = 0; i < NUM_BODIES; i++){
-        struct body body = system[i];
-        step(body, body.velocity, body.position, body.acceleration, system);
+        body body_0 = system[i];
+        step(body_0, body_0.velocity, body_0.position, body_0.acceleration, system, time_step);
     }
 }
 
-template <typename T> void tbp(struct body system[NUM_BODIES]){
-    total_step(system);
+template <typename T> void tbp(body system[NUM_BODIES], float time_step){
+    total_step(system, time_step);
 }
 
-void three_body_problem(stream &signal, stream &result) {
+void three_body_problem(float time_step, stream &signal, stream &result) {
+#pragma HLS INTERFACE s_axilite port=time_step
 #pragma HLS INTERFACE axis port=signal
 #pragma HLS INTERFACE axis port=result
 #pragma HLS INTERFACE ap_ctrl_none port=return
@@ -100,12 +104,11 @@ read:
         in[i] = temp.data;
     }
 
-    struct body system[NUM_BODIES];
-
+    body system[NUM_BODIES];
     for(int i = 0; i < N; i++){
         if(i % 8 == 0){
             int j = (int)(i / 8);
-            struct body new_body;
+            body new_body;
             new_body.id = in[j];
             new_body.mass = in[j + 1];
             new_body.position[0] = in[j + 2];
@@ -117,7 +120,8 @@ read:
             system[j] = new_body;
         }
     }
-    tbp<DataType>(system);
+
+    tbp<DataType>(system, time_step);
     for(int j = 0; j < NUM_BODIES; j++){
         int i = 8 * j;
         out[i] = system[j].id;
