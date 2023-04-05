@@ -15,6 +15,7 @@ def random_color():
 # physical scalars
 NUM_BODIES = 128
 G = -1
+MAX_VELOCITY = 2
 
 class body:
     def __init__(self, id, mass, position, velocity=[0,0], acceleration=[0, 0], color='white'):
@@ -65,10 +66,21 @@ def total_acceleration(body, system):
 def acceleration_step(body, system):
     return total_acceleration(body, system)
 
+def velocity_condition(velocity_x, velocity_y):
+    if velocity_x < -1 * MAX_VELOCITY:
+        velocity_x = -1 * MAX_VELOCITY
+    if velocity_y < -1 * MAX_VELOCITY:
+        velocity_y = -1 * MAX_VELOCITY
+    if velocity_x > MAX_VELOCITY:
+        velocity_x =  MAX_VELOCITY
+    if velocity_y > MAX_VELOCITY:
+        velocity_y = MAX_VELOCITY
+    return [velocity_x, velocity_y]
+
 def velocity_step(inital_velocity, time_step, acceleration):
     velocity_x = inital_velocity[0] + acceleration[0] * time_step
     velocity_y = inital_velocity[1] + acceleration[1] * time_step
-    return [velocity_x, velocity_y]
+    return velocity_condition(velocity_x, velocity_y)
 
 def postion_step(inital_position, initial_velocity, time_step, acceleration):
     postion_x = inital_position[0] + initial_velocity[0] * time_step + 0.5 * acceleration[0] * squared(time_step)
@@ -125,7 +137,6 @@ def sim(screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return pygame.quit()
-        print("Particle 0 position: ", system[0].position)
         time_start = datetime.datetime.now()
         total_step(system, time_step, dimensions)
         time_end = datetime.datetime.now()
@@ -133,7 +144,7 @@ def sim(screen):
         draw_all(system, screen)
         time_step += 0.001
         counter+=1
-        if counter == 808:
+        if counter == -808:
             print("Average step time in microseconds: ", numpy.average(time_average))
             break
 
