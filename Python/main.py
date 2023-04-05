@@ -15,7 +15,7 @@ def random_color():
 # physical scalars
 NUM_BODIES = 128
 G = -1
-MAX_VELOCITY = 2
+MAX_VELOCITY = 1
 
 class body:
     def __init__(self, id, mass, position, velocity=[0,0], acceleration=[0, 0], color='white'):
@@ -29,9 +29,6 @@ class body:
 # equations of motion
 def squared(x):
     return x*x
-
-def cubed(x):
-    return x*x*x
 
 def distance(body_0, body_1):
     x = squared(body_0.position[0] - body_1.position[0])
@@ -144,7 +141,7 @@ def sim(screen):
         draw_all(system, screen)
         time_step += 0.001
         counter+=1
-        if counter == -808:
+        if counter == 808:
             print("Average step time in microseconds: ", numpy.average(time_average))
             break
 
