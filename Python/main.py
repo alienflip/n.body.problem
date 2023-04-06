@@ -5,13 +5,6 @@ pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 screen.fill("black")
 
-def random_color():
-    r = random.randint(0, 255)
-    b = random.randint(0, 255)
-    g = random.randint(0, 255)
-    a = 255
-    return [r, g, b ,a]
-
 # physical scalars
 NUM_BODIES = 128
 G = -1
@@ -24,8 +17,15 @@ class body:
         self.position = position
         self.velocity = velocity
         self.acceleration = acceleration
-        self.color = random_color()
-        
+        self.color = self.random_color()
+
+    def random_color(self):
+        r = random.randint(0, 255)
+        b = random.randint(0, 255)
+        g = random.randint(0, 255)
+        a = 255
+        return [r, g, b ,a]
+
 # equations of motion
 def squared(x):
     return x*x
@@ -125,15 +125,13 @@ def draw_all(system, screen):
         draw(body.position, screen, body.color)
     pygame.display.flip()
 
-def sim(screen):
+if __name__ == '__main__':
     time_average, counter = [], 0
     time_step = 0
     system = [body(id=i, position=random_position(), mass=random.randint(0, 10)) for i in range(NUM_BODIES)]
     dimensions = [screen.get_width(), screen.get_height()]
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return pygame.quit()
+    is_running = True
+    while is_running:
         time_start = datetime.datetime.now()
         total_step(system, time_step, dimensions)
         time_end = datetime.datetime.now()
@@ -141,9 +139,13 @@ def sim(screen):
         draw_all(system, screen)
         time_step += 0.001
         counter+=1
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                is_running = False
+                break
         if counter == 808:
             print("Average step time in microseconds: ", numpy.average(time_average))
             break
-
-sim(screen=screen)
-print(" ")
+    print('')
+    print("C++ output: ")

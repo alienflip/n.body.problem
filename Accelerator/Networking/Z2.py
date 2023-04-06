@@ -49,7 +49,7 @@ while True:
     data = client_socket.recv(PACKET_SIZE)
     A = np.frombuffer(data, dtype=DATA_TYPE)
     
-    # Execute FFT on array
+    # Execute NBP on array
     silicon(A)
 
     # Send the modified array back to the client

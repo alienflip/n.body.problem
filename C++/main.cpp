@@ -1,14 +1,16 @@
 #include <iostream>
 
 #include <math.h>
-#include <time.h>
-#include <stdlib.h>
 
 using namespace std;
 
 const int NUM_BODIES = 128;
 const float G = -1.0;
 const float MAX_VELOCITY = 1;
+const float LOWER_BOUNDARY_X = -100;
+const float UPPER_BOUNDARY_X = 100;
+const float LOWER_BOUNDARY_Y = -100;
+const float UPPER_BOUNDARY_Y = 100;
 
 typedef struct _body {
     int id;
@@ -55,7 +57,6 @@ void acceleration_step(body& body_0, body* system, float out_acceleration[2]){
     for(int i = 0; i < NUM_BODIES; i++){
         if(system[i].id != body_0.id){
             float accel = acceleration(system[i].mass, body_0, system[i]);
-            //std::cout << accel << std::endl;
             direction(body_0, system[i], out_direction);
             out_acceleration[0] += out_direction[0] * accel;
             out_acceleration[1] += out_direction[1] * accel;
@@ -80,17 +81,36 @@ void velocity_step(float inital_velocity[2], float acceleration[2], float time_s
     out_velocity[1] = velocity_condition(out_velocity_y);
 }
 
+float position_condition_x(float in_position_x){
+    if(in_position_x < LOWER_BOUNDARY_X){
+        return UPPER_BOUNDARY_X;
+    }
+    else if(in_position_x > UPPER_BOUNDARY_X){
+        return LOWER_BOUNDARY_X;
+    }else{
+        return in_position_x;
+    }
+}
+
+float position_condition_y(float in_position_y){
+    if(in_position_y < LOWER_BOUNDARY_Y){
+        return UPPER_BOUNDARY_Y;
+    }
+    else if(in_position_y > UPPER_BOUNDARY_Y){
+        return LOWER_BOUNDARY_Y;
+    }else{
+        return in_position_y;
+    }
+}
+
 void postion_step(float inital_position[2], float initial_velocity[2], float acceleration[2], float time_step, float out_position[2]){
     float out_position_x = inital_position[0] + initial_velocity[0] * time_step + 0.5 * acceleration[0] * squared(time_step);
     float out_position_y = inital_position[1] + initial_velocity[1] * time_step + 0.5 * acceleration[1] * squared(time_step);
-    out_position[0] = out_position_x;
-    out_position[1] = out_position_y;
+    out_position[0] = position_condition_x(out_position_x);
+    out_position[1] = position_condition_y(out_position_y);
 }
 
-void step(body& body_0, body* system, float time_step){
-    float out_acceleration[2] = {0, 0};
-    float out_velocity[2] = {0, 0};
-    float out_position[2] = {0, 0};
+void step(body& body_0, body* system, float time_step, float out_position[2], float out_velocity[2], float out_acceleration[2]){
     acceleration_step(body_0, system, out_acceleration);
     velocity_step(body_0.velocity, body_0.acceleration, time_step, out_velocity);
     postion_step(body_0.position, body_0.velocity, body_0.acceleration, time_step, out_position);
@@ -103,8 +123,17 @@ void step(body& body_0, body* system, float time_step){
 }
 
 void total_step(body* system, float time_step){
+    float out_acceleration[2] = {0, 0};
+    float out_velocity[2] = {0, 0};
+    float out_position[2] = {0, 0};
     for(int i = 0; i < NUM_BODIES; i++){
-        step(system[i], system, time_step);
+        step(system[i], system, time_step, out_position, out_velocity, out_acceleration);
+        out_acceleration[0] = 0;
+        out_acceleration[1] = 0;
+        out_velocity[0] = 0;
+        out_velocity[1] = 0;
+        out_position[0] = 0;
+        out_position[1] = 0;
     }
 }
 
@@ -131,7 +160,8 @@ int main(){
         std::cout << "Particle positions: ";
         std::cout << " [" << system[0].position[0] << ", " << system[0].position[1] << "]";
         std::cout << " [" << system[1].position[0] << ", " << system[1].position[1] << "]";
-        std::cout << " [" << system[2].position[0] << ", " << system[2].position[1] << "] ... " << std::endl;
+        std::cout << " [" << system[2].position[0] << ", " << system[2].position[1] << "]";
+        std::cout << " ... " << std::endl;
         total_step(system, time_step);
         time_step += 0.001;
     }

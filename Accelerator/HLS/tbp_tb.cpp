@@ -1,9 +1,17 @@
 #include "tbp.hpp"
 
-void sw_tbp(body system[NUM_BODIES], float time_step) {
+void sw_tbp(body* system, float time_step) {
+    float out_acceleration[2] = {0, 0};
+    float out_velocity[2] = {0, 0};
+    float out_position[2] = {0, 0};
     for(int i = 0; i < NUM_BODIES; i++){
-        body body_0 = system[i];
-        step(body_0, body_0.velocity, body_0.position, body_0.acceleration, system, time_step);
+        step(system[i], system, time_step, out_position, out_velocity, out_acceleration);
+        out_acceleration[0] = 0;
+        out_acceleration[1] = 0;
+        out_velocity[0] = 0;
+        out_velocity[1] = 0;
+        out_position[0] = 0;
+        out_position[1] = 0;
     }
 }
 
