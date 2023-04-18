@@ -1,5 +1,15 @@
 # N-Body-Problem
 
+## abstract
+
+The N-Body-Problem is a problem in physics. It aims to model the interaction of many different bodies in the universe, all who excert gravitiational forces on eachother.
+
+In the following set of algorithms, the problem is approximately solved in 2+1D space using some fairly elementary techniques and formulae
+
+We go further, and send the computationally-intense calculations to an FPGA board for execution, and then read them back into the host program for optimum performance
+
+> read more on this project [here](https://tome.app/metagrok/optimisation-pynq-z2-clflkensa05ace840x533ue4j)
+
 ![Alt Text](./nbp.gif)
 
 ## set-up environment
