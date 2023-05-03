@@ -1,5 +1,5 @@
-#include "tbp.hpp"
-        
+#include "nbp.hpp"
+
 float squared(float x){
     return x*x;
 }
@@ -44,50 +44,14 @@ void acceleration_step(body& body_0, body* system, float out_acceleration[2]){
     }
 }
 
-float velocity_condition(float velocity){
-    if(velocity < -1 * MAX_VELOCITY){
-        return -1 * MAX_VELOCITY;
-    }else if(velocity > MAX_VELOCITY){
-        return MAX_VELOCITY;
-    }else{
-        return velocity;
-    }
-}
-
 void velocity_step(float inital_velocity[2], float acceleration[2], float time_step, float out_velocity[2]){
     float out_velocity_x = inital_velocity[0] + acceleration[0] * time_step;
     float out_velocity_y = inital_velocity[1] + acceleration[1] * time_step;
-    out_velocity[0] = velocity_condition(out_velocity_x);
-    out_velocity[1] = velocity_condition(out_velocity_y);
-}
-
-float position_condition_x(float in_position_x){
-    if(in_position_x < LOWER_BOUNDARY_X){
-        return UPPER_BOUNDARY_X;
-    }
-    else if(in_position_x > UPPER_BOUNDARY_X){
-        return LOWER_BOUNDARY_X;
-    }else{
-        return in_position_x;
-    }
-}
-
-float position_condition_y(float in_position_y){
-    if(in_position_y < LOWER_BOUNDARY_Y){
-        return UPPER_BOUNDARY_Y;
-    }
-    else if(in_position_y > UPPER_BOUNDARY_Y){
-        return LOWER_BOUNDARY_Y;
-    }else{
-        return in_position_y;
-    }
 }
 
 void postion_step(float inital_position[2], float initial_velocity[2], float acceleration[2], float time_step, float out_position[2]){
     float out_position_x = inital_position[0] + initial_velocity[0] * time_step + 0.5 * acceleration[0] * squared(time_step);
     float out_position_y = inital_position[1] + initial_velocity[1] * time_step + 0.5 * acceleration[1] * squared(time_step);
-    out_position[0] = position_condition_x(out_position_x);
-    out_position[1] = position_condition_y(out_position_y);
 }
 
 void step(body& body_0, body* system, float time_step, float out_position[2], float out_velocity[2], float out_acceleration[2]){
@@ -96,10 +60,6 @@ void step(body& body_0, body* system, float time_step, float out_position[2], fl
     postion_step(body_0.position, body_0.velocity, body_0.acceleration, time_step, out_position);
     body_0.acceleration[0] = out_acceleration[0];
     body_0.acceleration[1] = out_acceleration[1];
-    body_0.velocity[0] = out_velocity[0];
-    body_0.velocity[1] = out_velocity[1];
-    body_0.position[0] = out_position[0];
-    body_0.position[1] = out_position[1];
 }
 
 void total_step(body* system, float time_step){
@@ -117,43 +77,38 @@ void total_step(body* system, float time_step){
     }
 }
 
-template <typename T> void tbp(body* system, float time_step){
-    total_step(system, time_step);
-}
-
-void three_body_problem(float time_step, stream &signal, stream &result) {
-#pragma HLS INTERFACE s_axilite port=time_step
-#pragma HLS INTERFACE axis port=signal
-#pragma HLS INTERFACE axis port=result
+void nbp(stream &signal_in, stream &signal_out, int time_step) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS INTERFACE s_axilite port=time_step
+#pragma HLS INTERFACE axis port=signal_in
+#pragma HLS INTERFACE axis port=signal_out
 
     DataType in[N];
     DataType out[N];
 
 read:
     for(int i = 0; i < N; i++){
-        packet temp = signal.read();
+        packet temp = signal_in.read();
         in[i] = temp.data;
     }
 
+load:
     body system[NUM_BODIES];
     for(int i = 0; i < N; i++){
         if(i % 8 == 0){
-            int j = (int)(i / 8);
             body new_body;
-            new_body.id = in[j];
-            new_body.mass = in[j + 1];
-            new_body.position[0] = in[j + 2];
-            new_body.position[1] = in[j + 3];
-            new_body.velocity[0] = in[j + 4];
-            new_body.velocity[1] = in[j + 5];
-            new_body.acceleration[0] = in[j + 6];
-            new_body.acceleration[1] = in[j + 7];
-            system[j] = new_body;
+            new_body.id = (int)in[i];
+            new_body.mass = in[i + 1];
+            new_body.position[0] = in[i + 2];
+            new_body.position[1] = in[i + 3];
+            new_body.velocity[0] = in[i + 4];
+            new_body.velocity[1] = in[i + 5];
+            new_body.acceleration[0] = in[i + 6];
+            new_body.acceleration[1] = in[i + 7];
+            system[(int)(i/8)] = new_body;
         }
     }
-
-    tbp<DataType>(system, time_step);
+    total_step(system, time_step * unit_time);
     for(int j = 0; j < NUM_BODIES; j++){
         int i = 8 * j;
         out[i] = system[j].id;
@@ -176,6 +131,6 @@ write:
         }
         temp.last = last;
         temp.keep = -1;
-        result.write(temp);
+        signal_out.write(temp);
     }
 }

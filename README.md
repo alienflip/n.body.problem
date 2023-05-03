@@ -43,6 +43,14 @@ source ./bin/activate
 ./run.sh
 ```
 
+----
+
+> [this](./IR/) directory acts as a sort of intermediate representation between the [C++ ](./C++/) solution to the nbp and the lower level HLS solution
+
+> > it also includes a test harness - ideal inputs and outputs
+
+----
+
 ## run accelerator on Z2
 
 > follow the [accelerator directory](./Accelerator/)
