@@ -1,1 +1,1 @@
-pip install pygame numpy
+pip install pygame numpy PyOpenGL
