@@ -94,22 +94,6 @@ def random_position():
     return [x, y, z]
 
 
-def random_position_in_sphere(max_radius):
-    # Offset the center of the sphere to the center of the screen
-
-    # Generate random spherical coordinates
-    radius = random.uniform(0, max_radius)
-    theta = random.uniform(0, 2 * math.pi)  # azimuthal angle
-    phi = random.uniform(0, math.pi)  # polar angle
-
-    # Convert to Cartesian coordinates
-    x = radius * math.sin(phi) * math.cos(theta)
-    y = radius * math.sin(phi) * math.sin(theta)
-    z = radius * math.cos(phi)
-
-    return [x, y, z]
-
-
 def distance(body_0, body_1):
     x = squared(body_0.position[0] - body_1.position[0])
     y = squared(body_0.position[1] - body_1.position[1])
@@ -198,7 +182,6 @@ def velocity_step(inital_velocity, time_step, acceleration):
     velocity_y = inital_velocity[1] + acceleration[1] * time_step
     velocity_z = inital_velocity[2] + acceleration[2] * time_step
     return velocity_condition(velocity_x, velocity_y, velocity_z)
-    return [velocity_x, velocity_y, velocity_z]
 
 
 def postion_step(inital_position, initial_velocity, time_step, acceleration):
@@ -338,9 +321,12 @@ if __name__ == "__main__":
         for i in range(NUM_BODIES)
     ]
     is_running = True
+
+    # We create a "black" hole on user mouse clicks. RMB to repel, LMB to attract
     black_hole_position = None  # Initialize black hole position
     black_hole_mass = 100000  # Set black hole mass
     attracting = True
+
     while is_running:
         time_start = datetime.datetime.now()
         total_step(
@@ -376,7 +362,6 @@ if __name__ == "__main__":
                 )
             elif event.type == pygame.MOUSEBUTTONUP:
                 # Remove black hole when mouse button is released
-                # attracting = not attracting
                 black_hole_position = None
         if counter == 8080:
             print("Average step time in microseconds: ", numpy.average(time_average))
