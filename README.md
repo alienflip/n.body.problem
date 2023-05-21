@@ -56,3 +56,9 @@ source ./bin/activate
 > follow the [accelerator directory](./Accelerator/)
 
 > > on low spec machines - this system will at the least `4X` the native python implementation
+
+----
+
+## additions
+
+> check out the [Python](./Python/) subdirectory for some interesting 3d visualisations!
